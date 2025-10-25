@@ -1,4 +1,4 @@
-## Checkout Flow for a VPN Service, High-level architecture and component diagram
+## Checkout Flow for a VPN Service, High-level architecture and components diagram
 
 
 ![Express VPN Architecture Design](express-vpn-design-1.drawio.png)
@@ -45,9 +45,11 @@ Domain Modules (Here is how we structure the monolith internally)
 
 3. **Payment Processing (Step 1)**
    - **PaymentService** creates Stripe PaymentIntent
+   - Create PaymentIntent, payment record
    - Return client_secret to the frontend
    - Handles webhook from Stripe (`/api/payment/webhook`)
    - Updates `payments` table with payment status
+   - Updates `checkout_flows` status `payment_success` with payment status
    - On success: Emits `payment_success` event (Kafka topic)
 
 3. **Notification Phase (Step 2)**
@@ -61,11 +63,13 @@ Domain Modules (Here is how we structure the monolith internally)
      **4a. License Creation (Step 3)**
      - Creates license in `licenses` table
      - Generates unique `license_key`
+     - Create License record
      - Update `checkout_flows` status `license_status`
      
      **4b. Subscription Management (Step 4)**
      - Creates subscription record in `subscriptions` table
      - Sets billing cycle and next billing date
+     - Create Subscription record
      - Update `checkout_flows` status `subscription_status`
      
      **4c. Identity Creation (Step 5)**
