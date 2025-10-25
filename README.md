@@ -5,6 +5,7 @@
 
 *Design Option 1: Modular Monolithic / Domain Driven Architecture with Event Driven Pattern*
 
+```
 Domain Modules (Here is how we structure the monolith internally)
 /src
  ├── modules/
@@ -23,3 +24,5 @@ Domain Modules (Here is how we structure the monolith internally)
  │
  ├── app.ts                  → Entry point
  └── server.ts               → Server setup and integration
+
+```
