@@ -20,6 +20,7 @@ Domain Modules (Here is how we structure the monolith internally)
  ├── libs/
  │   ├── kafka/              → Kafka producer/consumer abstraction
  │   ├── database/           → Kysely + Postgres connection, migrations
+ │   ├── repos/              → modules database repos
  │   ├── common/             → Shared DTOs, events, error types
  │   └── utils/              → Logging, idempotency helpers, etc.
  │
@@ -28,8 +29,87 @@ Domain Modules (Here is how we structure the monolith internally)
 
 ```
 
-## Implementation notes
 
+### Steps Workflow
+
+#### Complete End-to-End Workflow
+1. **Frontend Initiation**
+   - User selects VPN plan on Frontend (Web/Mobile UI)
+   - Frontend calls `/api/checkout` (start checkout)
+   - API Gateway creates initial checkout flow record
+
+2. **Checkout Module Orchestration**
+   - Checkout Module receives request and initializes workflow
+   - Creates entry in `checkout_flows` table with status="initiated"
+   - Triggers express-vpn-api workflow using Saga/Workflow Orchestrator
+
+3. **Payment Processing (Step 1)**
+   - **PaymentService** creates Stripe PaymentIntent
+   - Return client_secret to the frontend
+   - Handles webhook from Stripe (`/api/payment/webhook`)
+   - Updates `payments` table with payment status
+   - On success: Emits `payment_success` event (Kafka topic)
+
+3. **Notification Phase (Step 2)**
+   - **NotificationWorker** receives `payment_success` events
+   - Sends Payment Confirmation Email to user
+
+4. **Provisioning Phase (Step 2)**
+   - **ProvisioningWorker** receives `payment_succes` event
+   - Executes three parallel operations:
+     
+     **4a. License Creation (Step 3)**
+     - Creates license in `licenses` table
+     - Generates unique `license_key`
+     - Update `checkout_flows` status `license_status`
+     
+     **4b. Subscription Management (Step 4)**
+     - Creates subscription record in `subscriptions` table
+     - Sets billing cycle and next billing date
+     - Update `checkout_flows` status `subscription_status`
+     
+     **4c. Identity Creation (Step 5)**
+     - Creates user identity in `identities` table
+     - Generates temporary password hash
+     - Creates magic link token
+     - Update `checkout_flows` status `identity_status`
+
+   - On Provisioning Complete: Emits `provisioning_complete` event (Kafka topic)
+
+5. **Notification Phase (Final Step)**
+   - **NotificationWorker** receives `provisioning_complete` events
+   - Sends Setup Complete Email with magic link
+   - Updates `notifications` table with delivery status
+
+6. **Final Completion**
+   - Workflow Orchestrator receives all completion events
+   - Updates `checkout_flows` table: status="complete"
+   - Emits `checkout_complete` event (Kafka topic)
+   - Returns success secret to Frontend
+
+7. **User Activation**
+   - User receives Setup Complete Email
+   - Clicks magic link to activate account
+   - Gets redirected to VPN setup page with credentials
+
+#### Event Flow Summary
+```
+Frontend → API Gateway → Checkout Module → PaymentService → Stripe
+                                      ↓
+Kafka: payment_success → ProvisioningWorker
+               ↓                      ↓
+      NotificationWorker              ↓
+                                      ↓
+[License, Subscription, Identity] → NotificationWorker
+                                      ↓
+Kafka: checkout_complete → Frontend (success response)
+```
+
+#### Error Handling & Compensation
+- Failed steps are logged in `failed_workflows` table
+- Saga pattern ensures compensation actions (e.g., refund payment if license creation fails)
+- Retry mechanisms with exponential backoff for transient failures
+- Dead letter queues for permanently failed events
 
 ## Database Schema (Table)
 | Purpose | Table | Key Fields |
@@ -197,5 +277,7 @@ export interface FailedWorkflow {
   created_at: Date;
 }
 ```
+
+
 
 
