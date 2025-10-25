@@ -1,4 +1,4 @@
-### Checkout Flow for a VPN Service, High-level architecture and component diagram
+## Checkout Flow for a VPN Service, High-level architecture and component diagram
 
 
 ![Express VPN Architecture Design](express-vpn-design-1.drawio.png)
@@ -28,7 +28,7 @@ Domain Modules (Here is how we structure the monolith internally)
 
 ```
 
-Implementation notes
+## Implementation notes
 
 
 ## Database Schema (Table)
