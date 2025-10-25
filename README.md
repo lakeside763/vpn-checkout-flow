@@ -26,3 +26,20 @@ Domain Modules (Here is how we structure the monolith internally)
  └── server.ts               → Server setup and integration
 
 ```
+
+Implementation notes
+
+
+## Database Schema (Table)
+| Purpose | Table | Key Fields |
+|---------|-------|------------|
+| Track flow progress | `checkout_flows` | `status`, `current_step`, `retry_count` |
+| Store payment data | `payments` | `payment_intent_id`, `status`, `idempotency_key` |
+| Issue VPN license | `licenses` | `license_key`, `status` |
+| Store plan info | `subscriptions` | `plan`, `billing_cycle`, `status` |
+| User identity | `identities` | `email`, `temp_password_hash`, `magic_link_token` |
+| Email logs | `notifications` | `type`, `status`, `retry_count` |
+| Reliable event publishing | `integration_events` | `event_type`, `payload`, `published` |
+| Error tracking | `failed_workflows` | `failed_step`, `error_message` |
+
+
