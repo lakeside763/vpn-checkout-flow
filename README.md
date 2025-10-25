@@ -43,3 +43,56 @@ Implementation notes
 | Error tracking | `failed_workflows` | `failed_step`, `error_message` |
 
 
+
+### Types (Models)
+
+#### Checkout Flow
+```
+export type CheckoutStatus =
+  | 'initiated'
+  | 'payment_success'
+  | 'provisioning'
+  | 'complete'
+  | 'failed';
+
+export interface CheckoutFlow {
+  id: string; // UUID
+  session_id: string; // Idempotency key or browser session
+  email: string;
+  amount_cents: number;
+  currency: string;
+  status: CheckoutStatus;
+  current_step: string | null;
+  retry_count: number;
+  error_message?: string | null;
+  created_at: Date;
+  updated_at: Date;
+}
+```
+
+#### Payment
+```
+export type PaymentStatus =
+  | 'initiated'
+  | 'requires_action'
+  | 'succeeded'
+  | 'failed'
+  | 'refunded';
+
+export interface Payment {
+  id: string; // UUID
+  checkout_flow_id: string; // FK → checkout_flows.id
+  payment_intent_id: string; // Stripe payment intent ID
+  status: PaymentStatus;
+  amount_cents: number;
+  currency: string;
+  provider: 'stripe' | 'paypal';
+  payment_method?: string | null;
+  receipt_url?: string | null;
+  idempotency_key: string; // for retries
+  created_at: Date;
+  updated_at: Date;
+}
+```
+
+
