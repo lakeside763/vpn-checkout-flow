@@ -9,12 +9,13 @@
 Domain Modules (Here is how we structure the monolith internally)
 /src
  ├── modules/
- │   ├── checkout/           → Orchestrates the workflow (Saga/Process Manager)
- │   ├── payment/            → Handles payment via external provider (e.g., Stripe)
- │   ├── license/            → Issues VPN licenses, integrates with internal VPN infra
- │   ├── subscription/       → Manages plan, billing cycle, renewal
- │   ├── identity/           → Creates user identity, temp password, JWT tokens
- │   └── notification/       → Sends email/magic link via BullMQ / Kafka worker
+ │   ├── checkout/                    → Orchestrates the workflow (Saga/Process Manager)
+ │   ├── payment/                     → Handles payment via external provider (e.g., Stripe)
+ │   ├── license/                     → Issues VPN licenses, integrates with internal VPN infra
+ │   ├── subscription/                → Manages plan, billing cycle, renewal
+ │   ├── identity(user/customer)/     → Creates user identity, temp password
+ │   ├── auth/                        → Create magic link, email token, JWT token (access token)
+ │   └── notification/                → Sends email/magic link via BullMQ / Kafka worker
  │
  ├── libs/
  │   ├── kafka/              → Kafka producer/consumer abstraction
@@ -43,10 +44,8 @@ Implementation notes
 | Error tracking | `failed_workflows` | `failed_step`, `error_message` |
 
 
-
 ### Types (Models)
-
-#### Checkout Flow
+#### Checkout Flow Model
 ```
 export type CheckoutStatus =
   | 'initiated'
@@ -56,13 +55,16 @@ export type CheckoutStatus =
   | 'failed';
 
 export interface CheckoutFlow {
-  id: string; // UUID
+  id: string;
   session_id: string; // Idempotency key or browser session
   email: string;
   amount_cents: number;
   currency: string;
   status: CheckoutStatus;
   current_step: string | null;
+  license_status: 'pending' | 'success' | 'failed';
+  subscription_status: 'pending' | 'success' | 'failed';
+  identity_status: 'pending' | 'success' | 'failed';
   retry_count: number;
   error_message?: string | null;
   created_at: Date;
@@ -70,7 +72,7 @@ export interface CheckoutFlow {
 }
 ```
 
-#### Payment
+#### Payment Model
 ```
 export type PaymentStatus =
   | 'initiated'
