@@ -56,7 +56,7 @@ export type CheckoutStatus =
 
 export interface CheckoutFlow {
   id: string;
-  session_id: string; // Idempotency key or browser session
+  session_id: string;
   email: string;
   amount_cents: number;
   currency: string;
@@ -76,7 +76,6 @@ export interface CheckoutFlow {
 ```
 export type PaymentStatus =
   | 'initiated'
-  | 'requires_action'
   | 'succeeded'
   | 'failed'
   | 'refunded';
@@ -90,10 +89,112 @@ export interface Payment {
   currency: string;
   provider: 'stripe' | 'paypal';
   payment_method?: string | null;
-  receipt_url?: string | null;
   idempotency_key: string; // for retries
   created_at: Date;
   updated_at: Date;
+}
+```
+
+#### Licese
+```
+export type LicenseStatus = 'active' | 'revoked' | 'expired';
+
+export interface License {
+  id: string; // UUID
+  checkout_flow_id: string; // FK → checkout_flows.id
+  license_key: string; // Unique license token
+  user_email: string;
+  status: LicenseStatus;
+  valid_from: Date;
+  valid_until: Date | null;
+  created_at: Date;
+}
+```
+
+#### Subscription
+```
+export type SubscriptionStatus =
+  | 'active'
+  | 'cancelled'
+  | 'expired'
+  | 'pending';
+
+export interface Subscription {
+  id: string; // UUID
+  checkout_flow_id: string; // FK → checkout_flows.id
+  plan: 'monthly' | 'annual' | 'trial';
+  billing_cycle: string; // e.g. "1_month", "12_months"
+  amount_cents: number;
+  next_billing_date?: Date | null;
+  status: SubscriptionStatus;
+  created_at: Date;
+}
+```
+
+#### Identity
+```
+export type IdentityStatus = 'pending' | 'active' | 'disabled';
+
+export interface Identity {
+  id: string; // UUID
+  checkout_flow_id: string; // FK → checkout_flows.id
+  email: string;
+  temp_password_hash?: string | null;
+  status: IdentityStatus;
+  magic_link_token?: string | null;
+  expires_at?: Date | null;
+  created_at: Date;
+}
+```
+
+#### Notification
+```
+export type NotificationType =
+  | 'payment_success'
+  | 'setup_complete'
+  | 'magic_link'
+  | 'reset_link'
+
+export type NotificationStatus =
+  | 'pending'
+  | 'sent'
+  | 'failed'
+  | 'retrying';
+
+export interface Notification {
+  id: string; // UUID
+  checkout_flow_id: string; // FK → checkout_flows.id
+  type: NotificationType;
+  status: NotificationStatus;
+  recipient_email: string;
+  message_id?: string | null; // Mailgun ID
+  retry_count: number;
+  created_at: Date;
+  updated_at: Date;
+}
+```
+
+#### IntegrationEvent
+```
+-- For kafka publishing
+export interface IntegrationEvent {
+  id: string; // UUID
+  event_type: string; // e.g. "payment_success", "license_created"
+  payload: Record<string, any>;
+  published: boolean;
+  created_at: Date;
+}
+```
+
+#### FailedWorkflow
+```
+export interface FailedWorkflow {
+  id: string; // UUID
+  checkout_flow_id: string; // FK → checkout_flows.id
+  failed_step: string;
+  error_message?: string | null;
+  compensation_done: boolean;
+  created_at: Date;
 }
 ```
 
