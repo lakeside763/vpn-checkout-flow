@@ -1,4 +1,5 @@
-## Checkout Flow for a Express VPN Checkout Service, High-level architecture and components diagram
+## Checkout Flow for a Express VPN Checkout
+High-level architecture and components diagram
 
 
 ![Express VPN Architecture Design](express-vpn-design-1.drawio.png)
@@ -161,6 +162,9 @@ Kafka: checkout_complete → Frontend (success response)
 - ✅ Reliability requirements (financial transactions)
 - ✅ Plans to evolve toward microservices
 
+
+![Express VPN Architecture Design](express-vpn-microservices-design.drawio.png)
+*Design Option 2: Microservices Architecture with Event Driven Pattern*
 
 
 ## Database Schema (Table)
