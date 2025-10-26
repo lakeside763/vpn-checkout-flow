@@ -29,7 +29,6 @@ Domain Modules (Here is how we structure the monolith internally)
 
 ```
 
-
 ### Steps Workflow
 
 #### Complete End-to-End Workflow
@@ -114,6 +113,55 @@ Kafka: checkout_complete → Frontend (success response)
 - Saga pattern ensures compensation actions (e.g., refund payment if license creation fails)
 - Retry mechanisms with exponential backoff for transient failures
 - Dead letter queues for permanently failed events
+
+## Architectural Trade-offs
+
+### ✅ **Advantages of This Design**
+
+#### **1. Event-Driven Architecture with Kafka**
+- **Decoupling**: Services communicate via events, not direct calls
+- **Scalability**: Each worker (Provisioning, Notification) can scale independently
+- **Reliability**: Message persistence ensures no data loss during failures
+- **Audit Trail**: Complete event history for compliance and debugging
+
+#### **2. Modular Monolithic Structure**
+- **Simplified Deployment**: Single application with multiple modules
+- **Shared Resources**: Database connections, configurations, and utilities
+- **Easy Development**: All code in one repository, simpler testing
+- **Transaction Management**: Easier to maintain data consistency
+
+#### **3. Worker Architecture Options**
+- **Same Process**: Both workers run in main application (simpler ops)
+- **Worker Threads**: CPU-intensive tasks isolated using `worker_threads`
+- **Separate Processes**: Independent scaling via Docker containers
+
+### ⚠️ **Trade-offs & Considerations**
+
+#### **1. Complexity vs Simplicity**
+- **Eventual Consistency**: Users see "processing" before completion
+- **Distributed Debugging**: Tracing across multiple components
+- **Infrastructure Overhead**: Kafka, monitoring, alerting setup
+
+#### **2. Performance Characteristics**
+- **User Experience**: Immediate response, background processing
+- **Resource Usage**: Higher memory for event queues and workers
+- **Latency**: Network hops between components add small delays
+
+#### **3. Operational Complexity**
+- **Monitoring**: Need to track events across multiple topics/workers
+- **Deployment**: More moving parts to coordinate
+- **Error Handling**: Distributed failure scenarios to consider
+- **Testing**: Integration testing across event flows
+
+### 🎯 **When This Architecture Makes Sense**
+
+#### **Good Fit For:**
+- ✅ Multi-step business processes (payment → provisioning → notification)
+- ✅ Different scaling requirements per component
+- ✅ Reliability requirements (financial transactions)
+- ✅ Plans to evolve toward microservices
+
+
 
 ## Database Schema (Table)
 | Purpose | Table | Key Fields |
