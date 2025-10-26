@@ -1,4 +1,4 @@
-## Checkout Flow for a VPN Service, High-level architecture and components diagram
+## Checkout Flow for a Express VPN Checkout Service, High-level architecture and components diagram
 
 
 ![Express VPN Architecture Design](express-vpn-design-1.drawio.png)
