@@ -163,7 +163,7 @@ Kafka: checkout_complete → Frontend (success response)
 - ✅ Plans to evolve toward microservices
 
 
-![Express VPN Architecture Design](express-vpn-microservices-design.drawio.png)
+![Express VPN Microservices Architecture Design](express-vpn-microservices-design.jpg)
 *Design Option 2: Microservices Architecture with Event Driven Pattern*
 
 
