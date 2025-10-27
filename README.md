@@ -2,7 +2,7 @@
 High-level architecture and components diagram
 
 
-![Express VPN Architecture Design](express-vpn-design-1.jpg)
+![Express VPN Architecture Design](express-vpn-design-1.webp)
 
 *Design Option 1: Modular Monolithic / Domain Driven Architecture with Event Driven Pattern*
 
@@ -163,7 +163,7 @@ Kafka: checkout_complete → Frontend (success response)
 - ✅ Plans to evolve toward microservices
 
 
-![Express VPN Microservices Architecture Design](express-vpn-microservices-design.jpg)
+![Express VPN Microservices Architecture Design](express-vpn-microservices-design.webp)
 *Design Option 2: Microservices Architecture with Event Driven Pattern*
 
 
