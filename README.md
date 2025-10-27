@@ -163,10 +163,6 @@ Kafka: checkout_complete → Frontend (success response)
 - ✅ Plans to evolve toward microservices
 
 
-![Express VPN Microservices Architecture Design](express-vpn-microservices-design.webp)
-*Design Option 2: Microservices Architecture with Event Driven Pattern*
-
-
 ## Database Schema (Table)
 | Purpose | Table | Key Fields |
 |---------|-------|------------|
@@ -333,6 +329,12 @@ export interface FailedWorkflow {
   created_at: Date;
 }
 ```
+
+![Express VPN Microservices Architecture Design](express-vpn-microservices-design.webp)
+*Design Option 2: Microservices Architecture with Event Driven Pattern*
+
+![Express VPN Microservices Architecture Design](express-vpn-microservices-temporal.webp)
+*Design Option 3: Microservices Architecture with Temporal Worker / Server*
 
 
 
