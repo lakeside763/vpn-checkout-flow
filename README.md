@@ -2,7 +2,7 @@
 High-level architecture and components diagram
 
 
-![Express VPN Architecture Design](express-vpn-design-1.drawio.png)
+![Express VPN Architecture Design](express-vpn-design-1.jpg)
 
 *Design Option 1: Modular Monolithic / Domain Driven Architecture with Event Driven Pattern*
 
